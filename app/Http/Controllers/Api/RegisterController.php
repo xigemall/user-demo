@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
 class RegisterController extends Controller
@@ -18,13 +19,28 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
+        $validator = $this->validateRequestForm($request);
+        if($validator->fails()){
+            return response()->post($validator->errors(),422,'验证数据失败');
+        }
 
-        $message = [
-            'name'=>'用户名',
-            'email'=>'邮箱',
-            'password'=>'密码',
-        ];
-        $request->validate([
+        $user = User::create([
+            'name' => $request->input('name'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
+        ]);
+        event(new Registered($user));
+        return response()->post($user);
+    }
+
+    /**
+     * 验证表单
+     * @param $request
+     * @return \Illuminate\Contracts\Validation\Validator
+     */
+    protected function validateRequestForm($request)
+    {
+        $validator = Validator::make($request->input(), [
             'name' => [
                 'string',
                 'max:10',
@@ -34,17 +50,10 @@ class RegisterController extends Controller
                 'required',
                 Rule::unique('users'),
             ],
-            'password'=>[
+            'password' => [
                 'required',
             ]
-        ],[],$message);
-
-        $user = User::create([
-            'name'=>$request->input('name'),
-            'email'=>$request->input('email'),
-            'password'=>Hash::make($request->input('password')),
         ]);
-        event(new Registered($user));
-        return response()->json($user);
+        return $validator;
     }
 }

@@ -52,8 +52,12 @@ class LoginController extends Controller
     public function logout()
     {
         if (Auth::guard('api')->check()) {
-            Auth::guard('api')->user()->token()->delete();
+            $auth = Auth::guard('api')->user()->token()->delete();
+            if ($auth == false) {
+                // 退出失败
+                return response()->post([], 400, '退出失败');
+            }
         }
-        return response()->json(['status' => 'success']);
+        return response()->post();
     }
 }
