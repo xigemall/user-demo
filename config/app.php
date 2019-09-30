@@ -175,6 +175,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        //response返回 添加的响应宏
         App\Providers\ResponseJsonServiceProvider::class,
 
     ],
