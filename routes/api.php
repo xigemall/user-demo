@@ -23,5 +23,10 @@ Route::post('/login','Api\LoginController@login');
 Route::middleware('auth:api')->namespace('Api')->group(function(){
     // 退出登录
     Route::post('/logout','LoginController@logout');
+
+    // 获取当前用户
+    Route::get('/current_user',function(){
+        return auth()->user();
+    });
 });
 
